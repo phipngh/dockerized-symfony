@@ -1,0 +1,6 @@
+kreait_firebase:
+  projects:
+    symfony_firebase:
+      credentials: "%kernel.project_dir%/config/credentials.json"
+      default: true
+      public: false
