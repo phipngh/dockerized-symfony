@@ -54,24 +54,3 @@ install: ## Install application
 clear: ## cache clean
 	rm -rf var/cache/*
 	@$(call run-in-container,www-data,php,php -d memory_limit=-1 bin/console cache:clear)
-
-##############################
-# QUALITY - STANDARD - SECURITY
-##############################
-
-test: ## Run phpunit tests
-	@$(call run-in-container,www-data,php,php -dmemory_limit=512M bin/phpunit --fail-on-warning --log-junit=build/phpunit/junit.xml $(extra-params))
-
-check: cs-check phpstan-analyse yaml-check ## Run all backend coding standards checks
-
-phpstan-analyse: ## Run phpstan analyse
-	@$(call run-in-container,www-data,php,php -d memory_limit=-1 vendor/bin/phpstan analyse -l 8 $(extra-params) src tests)
-
-cs-check: ## Check PHP coding standards
-	@$(call run-in-container,www-data,php,vendor/bin/php-cs-fixer fix --dry-run --verbose --diff $(extra-params))
-
-cs-fix: ## Fix PHP coding standards
-	@$(call run-in-container,www-data,php,php vendor/bin/php-cs-fixer fix --verbose  --diff $(extra-params))
-
-yaml-check: ## Yaml - config files lint check
-	@$(call run-in-container,www-data,php,bin/console lint:yaml config $(extra-params) --parse-tags --no-debug)R

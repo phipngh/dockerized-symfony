@@ -5,11 +5,16 @@ services:
     build:
       context: .
       args:
-        UID: 1000
-        GID: 1000
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
     volumes:
       - ./:/srv/app:rw,cached
       - ./var:/srv/app/var:rw
+    depends_on:
+      - database
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-dbuser}:${POSTGRES_PASSWORD:-dbpassword}@database:5432/${POSTGRES_DB:-app}?serverVersion=${POSTGRES_VERSION:-16}&charset=utf8
+
   nginx:
     image: nginx
     restart: unless-stopped
@@ -20,3 +25,18 @@ services:
       - .:/var/www/html
     depends_on:
       - php
+
+  database:
+    image: postgres:${POSTGRES_VERSION:-16}-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dbpassword}
+      POSTGRES_USER: ${POSTGRES_USER:-dbuser}
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    volumes:
+      - database_data:/var/lib/postgresql/data:rw
+
+volumes:
+  database_data:

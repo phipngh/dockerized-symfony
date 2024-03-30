@@ -1,16 +1,22 @@
 FROM php:8.2-fpm
 
+ARG UID=${UID}
+ARG GID=${GID}
+
 RUN apt-get update && apt-get upgrade -y && apt-get install -y \
       unzip \
       git \
       libicu-dev \
+      libpq-dev \
       libzip-dev \
     && pecl install grpc \
-    && docker-php-ext-configure intl \
+    && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
     && docker-php-ext-install \
       intl \
       opcache \
       zip \
+      pdo_pgsql \
+      pgsql \
     && docker-php-ext-enable grpc \
     && rm -rf /tmp/* \
     && rm -rf /var/list/apt/* \
@@ -23,8 +29,6 @@ ENV COMPOSER_ALLOW_SUPERUSER 1
 ENV PATH="${PATH}:/root/.composer/vendor/bin"
 
 ARG APP_HOME=/srv/app
-ARG UID=1000
-ARG GID=1000
 ARG USERNAME=www-data
 ENV USERNAME=$USERNAME
 
